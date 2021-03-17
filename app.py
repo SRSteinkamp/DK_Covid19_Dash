@@ -9,7 +9,7 @@ import io
 import re
 
 app = dash.Dash()
-#server = app.server
+server = app.server
 
 # https://api.statbank.dk/console#tableinfo
 
@@ -36,11 +36,15 @@ def get_available_dates(table_info):
     return available_dates
 
 
-# Create a priori info:
+# Get information about the database a priori.
 table_info = get_tableinformation()
+# Find regions and create a dropdown menu from it.
 dropdown_regions = get_region_info(table_info)
+# Find the data types (i.e. cases per 100.000 or raw)
 data_info = get_data_info(table_info)
+# Create a direct mapping between database code and value
 data_info_dict = {ii['value']: ii['label'] for ii in  data_info}
+# Find the available dates, which is needed to correctly send requests.
 available_dates = get_available_dates(table_info)
 
 
@@ -55,7 +59,7 @@ def sub_date(date):
 
 
 def get_dates(start="2020-03-21", end="2021-03-09",
-              available_dates= available_dates):
+              available_dates=available_dates):
     drange = pd.date_range(start=start, end=end)
     drange = [transform_date(str(ii)[:10]) for ii in drange]
     drange = [d for d in drange if d in available_dates]
@@ -63,7 +67,7 @@ def get_dates(start="2020-03-21", end="2021-03-09",
 
 
 def make_request(start_date='2021-03-06', end_date='2021-03-09', regions=['000'],
-                 population_scaling = ["50", "55"], available_dates = available_dates):
+                 population_scaling = ["50", "55"], available_dates=available_dates):
     request = dict(lang = 'en',
         table = 'SMIT4',
         format = "CSV",
@@ -79,15 +83,17 @@ def make_request(start_date='2021-03-06', end_date='2021-03-09', regions=['000']
             ),
             dict(
                 code = "Tid",
-                values = get_dates(start_date, end_date)
+                values = get_dates(start_date, end_date,
+                                   available_dates=available_dates)
          )
      ])
 
     return request
 
 
-def get_df(start_date, end_date, regions=['000']):
-    new_request = make_request(start_date, end_date, regions)
+def get_df(start_date, end_date, regions=['000'],
+           available_dates=available_dates):
+    new_request = make_request(start_date, end_date, regions, available_dates)
     r = requests.post('https://api.statbank.dk/v1/data', json=new_request)
     df = pd.read_csv(io.StringIO(r.text), sep=';')
     df['TID'] = pd.to_datetime(df['TID'], format='%YM%mD%d')
@@ -97,7 +103,6 @@ def get_df(start_date, end_date, regions=['000']):
 def plotly_graph(x, y, name):
     graph = go.Scatter(x=x, y=y, name=name,
                        mode='lines+markers')
-
     return graph
 
 
@@ -205,7 +210,7 @@ app.layout = html.Div([
     ])
 
 
-# Callback to store data:
+# Callback to store data, triggered by submit button.
 @app.callback(Output('dataset', 'children'),
               [Input('submit_button', 'n_clicks')],
               [State('pick_region', 'value'),
@@ -218,6 +223,7 @@ def query_data(click, region, start, end):
     return df.to_json(date_format='iso', orient='split', date_unit='s')
 
 
+# Callback to change graph appearance
 @app.callback(Output('ts-graph', 'figure'),
               [Input('scale_pop', 'value'),
                Input('growth', 'value'),
@@ -234,14 +240,13 @@ def update_graph(option1, option2, data, region):
     for reg in df['KOMK'].unique():
 
         tmp_df2 = tmp_df.query('KOMK == @reg')
-        if option2 == 'total':
 
+        if option2 == 'total':
             traces.append(plotly_graph(tmp_df2['TID'],
                                        tmp_df2['INDHOLD'],
                                        reg))
 
-        if option2 == 'new':
-
+        elif option2 == 'new':
             traces.append(plotly_graph(tmp_df2['TID'].iloc[1:],
                                        tmp_df2['INDHOLD'].diff().iloc[1:],
                                        reg))
