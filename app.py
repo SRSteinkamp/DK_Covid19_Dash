@@ -9,7 +9,7 @@ import io
 import re
 
 app = dash.Dash()
-server = app.server
+#server = app.server
 
 # https://api.statbank.dk/console#tableinfo
 
@@ -106,13 +106,19 @@ app.layout = html.Div([
     html.Div([
         dcc.Markdown(
             '''
-            A little Dashboard to compare and investigate COVID cases around Denmark and its communes.
+            A little Dashboard to compare and investigate COVID cases around Denmark and its
+            communes.
 
-            Data is retrieved from [statbank.dk](statbank.dk) via the POST api, however, data is only updated on Thursdays, so some recent data will be missing.
+            Data is retrieved from [statbank.dk](statbank.dk) via the POST api, however, data is
+            only updated on Thursdays, so some recent data will be missing.
 
-            To update the underlying data (i.e. different regions and date ranges) please click the `Update` button.
+            To update the underlying data (i.e. different regions and date ranges) please click the
+            `Update` button.
 
             Use the radio buttons below to change the appearance of the plot.
+
+            Finally, the plot also allows for all normal plotly operations like zooming into data
+            and selecting different data traces.
             '''
         )
     ]),
