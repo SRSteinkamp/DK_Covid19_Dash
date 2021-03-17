@@ -94,6 +94,13 @@ def get_df(start_date, end_date, regions=['000']):
     return df
 
 
+def plotly_graph(x, y, name):
+    graph = go.Scatter(x=x, y=y, name=name,
+                       mode='lines+markers')
+
+    return graph
+
+
 app.layout = html.Div([
     html.H1('Yet another Covid Dashboard (Denmark)'),
     html.Div([
@@ -223,15 +230,15 @@ def update_graph(option1, option2, data, region):
         tmp_df2 = tmp_df.query('KOMK == @reg')
         if option2 == 'total':
 
-            traces.append({'x': tmp_df2['TID'],
-                    'y': tmp_df2['INDHOLD'],
-                    'name': reg})
+            traces.append(plotly_graph(tmp_df2['TID'],
+                                       tmp_df2['INDHOLD'],
+                                       reg))
 
         if option2 == 'new':
 
-            traces.append({'x': tmp_df2['TID'].iloc[1:],
-                    'y': tmp_df2['INDHOLD'].diff().iloc[1:],
-                    'name': reg})
+            traces.append(plotly_graph(tmp_df2['TID'].iloc[1:],
+                                       tmp_df2['INDHOLD'].diff().iloc[1:],
+                                       reg))
 
     title = ' - '.join([str(ii) for ii in df['KOMK'].unique()])
     fig = {
