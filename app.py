@@ -63,11 +63,14 @@ def get_dates(start="2020-03-21", end="2021-03-09",
     drange = pd.date_range(start=start, end=end)
     drange = [transform_date(str(ii)[:10]) for ii in drange]
     drange = [d for d in drange if d in available_dates]
+
     return drange
 
 
 def make_request(start_date='2021-03-06', end_date='2021-03-09', regions=['000'],
-                 population_scaling = ["50", "55"], available_dates=available_dates):
+                 population_scaling = ["50", "55"],
+                 available_dates=available_dates):
+
     request = dict(lang = 'en',
         table = 'SMIT4',
         format = "CSV",
@@ -93,7 +96,9 @@ def make_request(start_date='2021-03-06', end_date='2021-03-09', regions=['000']
 
 def get_df(start_date, end_date, regions=['000'],
            available_dates=available_dates):
-    new_request = make_request(start_date, end_date, regions, available_dates)
+
+    new_request = make_request(start_date, end_date, regions,
+                               available_dates=available_dates)
     r = requests.post('https://api.statbank.dk/v1/data', json=new_request)
     df = pd.read_csv(io.StringIO(r.text), sep=';')
     df['TID'] = pd.to_datetime(df['TID'], format='%YM%mD%d')
@@ -246,7 +251,7 @@ def update_graph(option1, option2, data, region):
                                        tmp_df2['INDHOLD'],
                                        reg))
 
-        elif option2 == 'new':
+        if option2 == 'new':
             traces.append(plotly_graph(tmp_df2['TID'].iloc[1:],
                                        tmp_df2['INDHOLD'].diff().iloc[1:],
                                        reg))
