@@ -95,14 +95,15 @@ def get_df(start_date, end_date, regions=['000']):
 
 
 app.layout = html.Div([
-    html.H1('Yet another Covid Dahsboard (Denmark)'),
+    html.H1('Yet another Covid Dashboard (Denmark)'),
     html.Div([
         dcc.Markdown(
             '''
             A little Dashboard to compare and investigate COVID cases around Denmark and its communes.
-            Data is retrieved from [statbank.dk](statbank.dk) via the POST api, however, data is only updated every Thursday, so some recent data will be missing.
 
-            To update the underlying data (i.e. different regions and date ranges) please click the `Submit` button.
+            Data is retrieved from [statbank.dk](statbank.dk) via the POST api, however, data is only updated on Thursdays, so some recent data will be missing.
+
+            To update the underlying data (i.e. different regions and date ranges) please click the `Update` button.
 
             Use the radio buttons below to change the appearance of the plot.
             '''
@@ -142,7 +143,7 @@ app.layout = html.Div([
     html.Div([
         html.Button(id='submit_button',
                     n_clicks=0,
-                    children='Submit',
+                    children='Update',
                     style={'fontSize': 20,
                            'marginTop' : '60px',
                            'height': '45px',
