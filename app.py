@@ -116,10 +116,12 @@ app.layout = html.Div([
     html.Div([
         dcc.Markdown(
             '''
+            IMPORTANT: The underlying databases are not updated anymore.
+
             A little Dashboard to compare and investigate COVID cases around Denmark and its
             communes.
 
-            Data is retrieved from [statbank.dk](statbank.dk) via the POST api, however, data is
+            Data is retrieved from [statbank.dk](https://statbank.dk) via the POST api, however, data is
             only updated on Thursdays, so some recent data will be missing.
 
             To update the underlying data (i.e. different regions and date ranges) please click the
